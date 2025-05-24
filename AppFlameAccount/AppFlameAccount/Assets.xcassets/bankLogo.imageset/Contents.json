@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "bankLogo.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

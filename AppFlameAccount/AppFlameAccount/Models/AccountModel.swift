@@ -1,0 +1,21 @@
+//
+//  AccountModel.swift
+//  AppFlameAccount
+//
+//  Created by Леонід Шевченко on 23.05.2025.
+//
+
+import Foundation
+
+struct AccountModel: Identifiable, Equatable {
+    let id: UUID = .init()
+    let date: Date
+    let amount: Double
+    let name: String
+    let description: String
+}
+
+enum Period: String, CaseIterable, Identifiable {
+    case week, month, year
+    var id: String { rawValue }
+}
