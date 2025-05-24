@@ -112,6 +112,7 @@ struct StatisticsRootView: View {
                     .fill(Color(.systemBackground))
                     .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -2)
             )
+            .ignoresSafeArea()
             .frame(height: geometry.size.height * (position.wrappedValue == .middle ? 0.5 : 0.9))
             .frame(maxHeight: .infinity, alignment: .bottom)
         }

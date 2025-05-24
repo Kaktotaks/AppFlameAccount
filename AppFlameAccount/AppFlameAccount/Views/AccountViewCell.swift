@@ -20,20 +20,21 @@ struct AccountViewCell: View {
             VStack(alignment: .leading) {
                 HStack {
                     Image(.bankLogo)
+                        .resizable()
                         .frame(width: 48, height: 48)
                         .padding(.horizontal, 16)
                     
                     VStack(alignment: .leading) {
                         Text(name)
-                            .font(.subheadline)
+                            .textStyle(.accountsListTitle)
                         Text(description)
-                            .font(.caption)
+                            .textStyle(.accountListDescriptionTitle)
                     }
                     
                     Spacer()
                     
                     Text("$\(amount)")
-                        .font(.subheadline)
+                        .textStyle(.accountListAmmount)
                         .padding(.trailing, 16)
                 }
             }

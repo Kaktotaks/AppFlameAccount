@@ -13,7 +13,7 @@ enum MockDataGenerator {
         let now = Date()
         return (50..<365).map { offset in
             let date = calendar.date(byAdding: .day, value: -offset, to: now) ?? now
-            return AccountModel(date: date, amount: Double.random(in: 50...1000), name: "Account \(Int.random(in: 1...3))", description: "Account Description")
+            return AccountModel(date: date, amount: Int.random(in: 50...1000), name: "Account \(Int.random(in: 1...3))", description: "Account Description")
         }
     }
 }

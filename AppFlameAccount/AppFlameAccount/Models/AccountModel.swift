@@ -10,7 +10,7 @@ import Foundation
 struct AccountModel: Identifiable, Equatable {
     let id: UUID = .init()
     let date: Date
-    let amount: Double
+    let amount: Int
     let name: String
     let description: String
 }

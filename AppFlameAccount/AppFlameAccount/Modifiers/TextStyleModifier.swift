@@ -34,22 +34,20 @@ enum TextStyle {
             return .system(size: 14, weight: .regular)
         case .periodTitle:
             return .system(size: 16, weight: .medium)
-        case .accountsListTitle:
-            return .system(size: 20, weight: .semibold)
         case .accountListDescriptionTitle:
-            return .system(size: 16, weight: .regular)
+            return .system(size: 13, weight: .light)
         case .accountNameTitle:
-            return .system(size: 18, weight: .medium)
-        case .accountDescriptionTitle:
-            return .system(size: 14, weight: .regular)
-        case .accountListAmmount:
-            return .system(size: 16, weight: .bold)
-        case .detailsAccountNameTitle:
-            return .system(size: 22, weight: .semibold)
-        case .detailsAccountDescriptionTitle:
             return .system(size: 16, weight: .regular)
+        case .accountDescriptionTitle:
+            return .system(size: 13, weight: .light)
+        case .accountListAmmount, .accountsListTitle:
+            return .system(size: 16, weight: .regular)
+        case .detailsAccountNameTitle:
+            return .system(size: 24, weight: .regular)
+        case .detailsAccountDescriptionTitle:
+            return .system(size: 16, weight: .light)
         case .detailsAccountAmmount:
-            return .system(size: 20, weight: .bold)
+            return .system(size: 40, weight: .regular)
         }
     }
     
@@ -63,21 +61,34 @@ enum TextStyle {
                 .center
         }
     }
+    
+    var color: Color {
+        switch self {
+        case .dateDescription, .accountDescriptionTitle, .detailsAccountDescriptionTitle:
+            return Color.gray
+        case .secondaryBalance:
+            return .whiteSecondary
+        default:
+            return .primaryText
+        }
+    }
 }
 
 struct CustomTextStyle: ViewModifier {
     var font: Font = .subheadline
     var alignment: TextAlignment = .center
+    var color: Color = .primary
     
     func body(content: Content) -> some View {
         content
             .font(font)
             .multilineTextAlignment(alignment)
+            .foregroundColor(color)
     }
 }
 
 extension View {
-    func customTextStyle(textStyle: TextStyle) -> some View {
-        self.modifier(CustomTextStyle(font: textStyle.font, alignment: textStyle.alignment))
+    func textStyle(_ style: TextStyle) -> some View {
+        self.modifier(CustomTextStyle(font: style.font, alignment: style.alignment))
     }
 }

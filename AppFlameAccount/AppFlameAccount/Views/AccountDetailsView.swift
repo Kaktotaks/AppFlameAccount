@@ -46,19 +46,23 @@ struct AccountDetailsView: View {
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            HStack(alignment: .center, spacing: 24) {
+            VStack(alignment: .center, spacing: 24) {
                     Image(.bankLogo)
-                        .frame(width: 80, height: 80)
-                        .padding(.horizontal, 16)
+                    .resizable()
+                    .frame(width: 80, height: 80)
+                    .padding(.top, 36)
                     
-                Text(viewStore.model.name)
-                            .font(.subheadline)
-                Text(viewStore.model.description)
-                            .font(.caption)
+                VStack(spacing: 4) {
+                    Text(viewStore.model.name)
+                        .textStyle(.detailsAccountNameTitle)
+                    Text(viewStore.model.description)
+                        .textStyle(.detailsAccountDescriptionTitle)
+                }
                     
                 Text("$\(viewStore.model.amount)")
-                        .font(.subheadline)
-                        .padding(.trailing, 16)
+                    .textStyle(.detailsAccountAmmount)
+                
+                Spacer()
             }
             .setupBackButton() {
                 viewStore.send(.delegate(.navigateBack))
