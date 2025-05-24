@@ -67,9 +67,7 @@ struct AccountDetailsView: View {
             .setupBackButton() {
                 viewStore.send(.delegate(.navigateBack))
             }
-            .navigationBarBackButtonHidden(true)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Details")
+            .navigationDetailsModifier(title: "Details")
         }
     }
 }

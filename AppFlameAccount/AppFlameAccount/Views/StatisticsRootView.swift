@@ -13,26 +13,25 @@ struct StatisticsRootView: View {
     @State var store: StoreOf<RootStore>
     @State private var bottomSheetPosition: BottomSheetPosition = .middle
     
-    enum BottomSheetPosition: CGFloat, CaseIterable {
-        case top = 0.1
-        case middle = 0.5
-        
+    enum BottomSheetPosition {
+        case top
+        case middle
+
+        func offsetY(for geometry: GeometryProxy) -> CGFloat {
+            switch self {
+            case .top:
+                return geometry.safeAreaInsets.top
+            case .middle:
+                return geometry.size.height / 1.5
+            }
+        }
+
         var springAnimation: Animation {
             switch self {
             case .top:
-                return .interpolatingSpring(
-                    mass: 0.5,
-                    stiffness: 300,
-                    damping: 20,
-                    initialVelocity: 0
-                )
+                return .interpolatingSpring(mass: 0.5, stiffness: 300, damping: 20, initialVelocity: 0)
             case .middle:
-                return .interpolatingSpring(
-                    mass: 0.8,
-                    stiffness: 250,
-                    damping: 25,
-                    initialVelocity: 0
-                )
+                return .interpolatingSpring(mass: 0.8, stiffness: 250, damping: 25, initialVelocity: 0)
             }
         }
     }
@@ -79,9 +78,9 @@ struct StatisticsRootView: View {
                     .gesture(
                         DragGesture()
                             .onEnded { value in
-                                let dragPercentage = value.translation.height / geometry.size.height
+                                let threshold = geometry.size.height * 0.25
                                 withAnimation(position.wrappedValue.springAnimation) {
-                                    if dragPercentage > 0.3 {
+                                    if value.translation.height > threshold {
                                         position.wrappedValue = .middle
                                     } else {
                                         position.wrappedValue = .top
@@ -105,6 +104,7 @@ struct StatisticsRootView: View {
                     }
                     .listRowInsets(EdgeInsets())
                 }
+                .navigationDetailsModifier(title: "Statistics")
                 .listStyle(.plain)
             }
             .background(
@@ -112,9 +112,9 @@ struct StatisticsRootView: View {
                     .fill(Color(.systemBackground))
                     .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -2)
             )
+            .frame(maxHeight: .infinity, alignment: .top)
+            .offset(y: position.wrappedValue.offsetY(for: geometry))
             .ignoresSafeArea()
-            .frame(height: geometry.size.height * (position.wrappedValue == .middle ? 0.5 : 0.9))
-            .frame(maxHeight: .infinity, alignment: .bottom)
         }
     }
     
