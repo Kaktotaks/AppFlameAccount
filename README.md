@@ -1,2 +1,2 @@
 # AppFlameAccount
-Test task for AppFlame. Using tech: Charts, SwiftUI.
+Test task for AppFlame. Using tech: TCA(POINFREE) Charts, SwiftUI.
