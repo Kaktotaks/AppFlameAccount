@@ -13,15 +13,19 @@ struct NavigationBarModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle(title)
-            .foregroundStyle(color)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(color)
+                }
+            }
     }
 }
 
 extension View {
-    func navigationDetailsModifier(title: String, color: Color = .black) -> some View {
+    func navigationBarModifier(title: String, color: Color = .black) -> some View {
         self.modifier(NavigationBarModifier(title: title, color: color))
     }
 }

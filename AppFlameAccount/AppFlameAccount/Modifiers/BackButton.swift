@@ -29,10 +29,13 @@ struct BackButton: ViewModifier {
     func body(content: Content) -> some View {
         content
             .navigationBarBackButtonHidden(true)
-            .navigationBarItems(leading: NavigationBarButton(imageName: image, action: action))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationBarButton(imageName: image, action: action)
+                }
+            }
     }
 }
-
 extension View {
     func setupBackButton(imageName: String = "backButton", action: @escaping () -> Void) -> some View {
         self.modifier(BackButton(image: imageName, action: action))

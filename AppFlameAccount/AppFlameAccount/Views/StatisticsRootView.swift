@@ -17,15 +17,6 @@ struct StatisticsRootView: View {
         case top
         case middle
         
-        func offsetY(for geometry: GeometryProxy) -> CGFloat {
-            switch self {
-            case .top:
-                return geometry.safeAreaInsets.top + 46
-            case .middle:
-                return geometry.size.height / 1.5
-            }
-        }
-        
         var springAnimation: Animation {
             switch self {
             case .top:
@@ -41,33 +32,27 @@ struct StatisticsRootView: View {
             store.scope(state: \.path, action: \.path)
         ) {
             WithViewStore(self.store, observe: { $0 }) { viewStore in
+                GeometryReader { proxy in
                 ZStack(alignment: .top) {
-                    VStack {
-                        MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+                        VStack {
+                            MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+                                .padding(.horizontal, 32)
+                            
+                            ChartView(entries: filteredEntries(viewStore: viewStore))
+                                .frame(height: proxy.size.height * 0.2)
+                                .padding(.top, 32)
+                            
+                            PeriodPickerView(viewStore)
+                                .padding(.top, 24)
+                            
+                        }
+                        .frame(height: proxy.size.height * 0.4)
+                        .padding(.top, 32)
                         
-                        ChartView(entries: filteredEntries(viewStore: viewStore))
-                            .frame(height: UIScreen.main.bounds.height * 0.2)
-                            .padding(.top, 32)
-                        
-                        PeriodPickerView(viewStore)
-                        
+                        BottomSheetView(viewStore, position: $bottomSheetPosition, mainContentProxy: proxy)
                     }
-                    .padding(.top, 40)
-                    .padding(.bottom, 32)
-                    
-                    BottomSheetView(viewStore, position: $bottomSheetPosition)
                 }
-                .overlay {
-                    VStack {
-                        Text("Statistics")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.top, 70)
-                        
-                        Spacer()
-                    }
-                    .ignoresSafeArea()
-                }
+                .navigationBarModifier(title: "Statistics", color: .white)
                 .background(Color("chartSecondaryColor"))
                 .onAppear {
                     viewStore.send(.loadMockData)
@@ -82,7 +67,7 @@ struct StatisticsRootView: View {
     }
     
     @ViewBuilder
-    private func BottomSheetView(_ viewStore: ViewStoreOf<RootStore>, position: Binding<BottomSheetPosition>) -> some View {
+    private func BottomSheetView(_ viewStore: ViewStoreOf<RootStore>, position: Binding<BottomSheetPosition>, mainContentProxy: GeometryProxy) -> some View {
         GeometryReader { geometry in
             VStack(alignment: .leading, spacing: 16) {
                 Capsule()
@@ -133,9 +118,11 @@ struct StatisticsRootView: View {
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
                     .fill(Color(.systemBackground))
             )
-            .frame(maxHeight: .infinity, alignment: .top)
-            .offset(y: position.wrappedValue.offsetY(for: geometry))
-            .ignoresSafeArea()
+            .frame(height: max(0, position.wrappedValue == .top
+                               ? UIScreen.main.bounds.height
+                              : geometry.size.height * 0.5))
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .ignoresSafeArea(.all, edges: .bottom)
         }
     }
     
@@ -187,6 +174,7 @@ private struct MainAmountView: View {
                     .textStyle(.mainBalance)
                     .opacity(0.6)
                 Text("\(amount)")
+                    .lineLimit(0)
                     .textStyle(.mainBalance)
             }
             

@@ -64,10 +64,10 @@ struct AccountDetailsView: View {
                 
                 Spacer()
             }
+            .navigationBarModifier(title: "Details", color: .black)
             .setupBackButton() {
                 viewStore.send(.delegate(.navigateBack))
             }
-            .navigationDetailsModifier(title: "Details")
         }
     }
 }
