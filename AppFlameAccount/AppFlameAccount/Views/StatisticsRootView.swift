@@ -16,16 +16,16 @@ struct StatisticsRootView: View {
     enum BottomSheetPosition {
         case top
         case middle
-
+        
         func offsetY(for geometry: GeometryProxy) -> CGFloat {
             switch self {
             case .top:
-                return geometry.safeAreaInsets.top
+                return geometry.safeAreaInsets.top + 46
             case .middle:
                 return geometry.size.height / 1.5
             }
         }
-
+        
         var springAnimation: Animation {
             switch self {
             case .top:
@@ -42,11 +42,33 @@ struct StatisticsRootView: View {
         ) {
             WithViewStore(self.store, observe: { $0 }) { viewStore in
                 ZStack(alignment: .top) {
-                    ChartView(entries: filteredEntries(viewStore: viewStore), selectedDate: viewStore.selectedDate)
-                        .frame(height: UIScreen.main.bounds.height * 0.5)
+                    VStack {
+                        MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+                        
+                        ChartView(entries: filteredEntries(viewStore: viewStore))
+                            .frame(height: UIScreen.main.bounds.height * 0.2)
+                            .padding(.top, 32)
+                        
+                        PeriodPickerView(viewStore)
+                        
+                    }
+                    .padding(.top, 40)
+                    .padding(.bottom, 32)
                     
                     BottomSheetView(viewStore, position: $bottomSheetPosition)
                 }
+                .overlay {
+                    VStack {
+                        Text("Statistics")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.top, 70)
+                        
+                        Spacer()
+                    }
+                    .ignoresSafeArea()
+                }
+                .background(Color("chartSecondaryColor"))
                 .onAppear {
                     viewStore.send(.loadMockData)
                 }
@@ -104,13 +126,12 @@ struct StatisticsRootView: View {
                     }
                     .listRowInsets(EdgeInsets())
                 }
-                .navigationDetailsModifier(title: "Statistics")
+                //                .navigationDetailsModifier(title: "Statistics", color: .white)
                 .listStyle(.plain)
             }
             .background(
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
                     .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -2)
             )
             .frame(maxHeight: .infinity, alignment: .top)
             .offset(y: position.wrappedValue.offsetY(for: geometry))
@@ -148,4 +169,52 @@ struct StatisticsRootView: View {
                 )
             }
     }
+}
+
+
+private struct MainAmountView: View {
+    let amount: Double
+    let isNegative: Bool
+    let description: String
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 0) {
+                if isNegative {
+                    Text("-")
+                }
+                Text("$")
+                    .textStyle(.mainBalance)
+                    .opacity(0.6)
+                Text("\(amount)")
+                    .textStyle(.mainBalance)
+            }
+            
+            Text(description)
+                .textStyle(.dateDescription)
+                .textStyle(.mainBalance)
+                .opacity(0.6)
+        }
+    }
+}
+
+@ViewBuilder
+private func PeriodPickerView(_ viewStore: ViewStoreOf<RootStore>) -> some View {
+    HStack(spacing: 12) {
+        ForEach(Period.allCases, id: \.self) { period in
+            Button {
+                viewStore.send(.selectPeriod(period))
+            } label: {
+                Text(period.rawValue.capitalized)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(viewStore.selectedPeriod == period ? Color.white.opacity(0.15) : Color.clear)
+                    )
+                    .foregroundColor(.white)
+            }
+        }
+    }
+    .padding(.top, 8)
 }

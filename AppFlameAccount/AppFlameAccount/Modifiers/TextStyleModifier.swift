@@ -25,13 +25,13 @@ enum TextStyle {
     var font: Font {
         switch self {
         case .mainTitle:
-            return .system(size: 34, weight: .bold)
+            return .system(size: 17, weight: .regular)
         case .mainBalance:
-            return .system(size: 28, weight: .semibold)
+            return .system(size: 48, weight: .semibold)
         case .secondaryBalance:
             return .system(size: 24, weight: .regular)
         case .dateDescription:
-            return .system(size: 14, weight: .regular)
+            return .system(size: 13, weight: .regular)
         case .periodTitle:
             return .system(size: 16, weight: .medium)
         case .accountListDescriptionTitle:
@@ -64,6 +64,8 @@ enum TextStyle {
     
     var color: Color {
         switch self {
+        case .mainTitle, .mainBalance, .dateDescription:
+            return .white
         case .dateDescription, .accountDescriptionTitle, .detailsAccountDescriptionTitle:
             return Color.gray
         case .secondaryBalance:
@@ -77,7 +79,7 @@ enum TextStyle {
 struct CustomTextStyle: ViewModifier {
     var font: Font = .subheadline
     var alignment: TextAlignment = .center
-    var color: Color = .primary
+    var color: Color
     
     func body(content: Content) -> some View {
         content
@@ -89,6 +91,6 @@ struct CustomTextStyle: ViewModifier {
 
 extension View {
     func textStyle(_ style: TextStyle) -> some View {
-        self.modifier(CustomTextStyle(font: style.font, alignment: style.alignment))
+        self.modifier(CustomTextStyle(font: style.font, alignment: style.alignment, color: style.color))
     }
 }
