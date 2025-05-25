@@ -58,7 +58,7 @@ struct AccountDetailsView: View {
                         .textStyle(.detailsAccountDescriptionTitle)
                 }
                     
-                Text("$\(viewStore.model.amount)")
+                Text("$" + viewStore.model.amount.formattedAmount)
                     .textStyle(.detailsAccountAmmount)
                 
                 Spacer()

@@ -10,7 +10,7 @@ import SwiftUI
 struct AccountViewCell: View {
     let name: String
     let description: String
-    let amount: Int
+    let amount: Double
     let onTapGesture: () -> Void
     
     var body: some View {
@@ -33,7 +33,7 @@ struct AccountViewCell: View {
                     
                     Spacer()
                     
-                    Text("$\(amount)")
+                    Text("$" + amount.formattedAmount)
                         .textStyle(.accountListAmmount)
                         .padding(.trailing, 16)
                 }

@@ -60,7 +60,7 @@ struct StatisticsRootView: View {
     @ViewBuilder
     private func MainContentView(_ viewStore: ViewStoreOf<RootStore>, proxy: GeometryProxy) -> some View {
         VStack {
-            MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+            MainAmountView(amount: 177845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
                 .padding(.horizontal, 32)
             
             ChartView(entries: filteredEntries(viewStore: viewStore))
@@ -114,7 +114,7 @@ struct StatisticsRootView: View {
                     AccountViewCell(
                         name: account.name,
                         description: account.description,
-                        amount: Int(account.amount)
+                        amount: account.amount
                     ) {
                         viewStore.send(.showDetailsView(model: account))
                     }
@@ -181,7 +181,7 @@ private struct MainAmountView: View {
                 Text("$")
                     .textStyle(.mainBalance)
                     .opacity(0.6)
-                Text("\(amount)")
+                Text(amount.formattedAmount)
                     .lineLimit(0)
                     .textStyle(.mainBalance)
             }
