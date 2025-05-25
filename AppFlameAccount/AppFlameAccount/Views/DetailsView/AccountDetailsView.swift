@@ -11,7 +11,6 @@ import ComposableArchitecture
 @Reducer
 struct AccountDetailsStore {
     struct State: Equatable {
-        var foo = ""
         var model: AccountModel
     }
     

@@ -9,23 +9,28 @@ import SwiftUI
 import ComposableArchitecture
 import Charts
 
+enum BottomSheetPosition {
+    case top
+    case middle
+    
+    var springAnimation: Animation {
+        switch self {
+        case .top:
+            return .interpolatingSpring(mass: 0.5, stiffness: 300, damping: 20, initialVelocity: 0)
+        case .middle:
+            return .interpolatingSpring(mass: 0.8, stiffness: 250, damping: 25, initialVelocity: 0)
+        }
+    }
+}
+
+enum Period: String, CaseIterable, Identifiable {
+    case week, month, year
+    var id: String { rawValue }
+}
+
 struct StatisticsRootView: View {
     @State var store: StoreOf<RootStore>
     @State private var bottomSheetPosition: BottomSheetPosition = .middle
-    
-    enum BottomSheetPosition {
-        case top
-        case middle
-        
-        var springAnimation: Animation {
-            switch self {
-            case .top:
-                return .interpolatingSpring(mass: 0.5, stiffness: 300, damping: 20, initialVelocity: 0)
-            case .middle:
-                return .interpolatingSpring(mass: 0.8, stiffness: 250, damping: 25, initialVelocity: 0)
-            }
-        }
-    }
     
     var body: some View {
         NavigationStackStore(
@@ -33,22 +38,8 @@ struct StatisticsRootView: View {
         ) {
             WithViewStore(self.store, observe: { $0 }) { viewStore in
                 GeometryReader { proxy in
-                ZStack(alignment: .top) {
-                        VStack {
-                            MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
-                                .padding(.horizontal, 32)
-                            
-                            ChartView(entries: filteredEntries(viewStore: viewStore))
-                                .frame(height: proxy.size.height * 0.2)
-                                .padding(.top, 32)
-                            
-                            PeriodPickerView(viewStore)
-                                .padding(.top, 24)
-                            
-                        }
-                        .frame(height: proxy.size.height * 0.4)
-                        .padding(.top, 32)
-                        
+                    ZStack(alignment: .top) {
+                        MainContentView(viewStore, proxy: proxy)
                         BottomSheetView(viewStore, position: $bottomSheetPosition, mainContentProxy: proxy)
                     }
                 }
@@ -64,6 +55,24 @@ struct StatisticsRootView: View {
                 AccountDetailsView(store: store)
             }
         }
+    }
+    
+    @ViewBuilder
+    private func MainContentView(_ viewStore: ViewStoreOf<RootStore>, proxy: GeometryProxy) -> some View {
+        VStack {
+            MainAmountView(amount: 17845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+                .padding(.horizontal, 32)
+            
+            ChartView(entries: filteredEntries(viewStore: viewStore))
+                .frame(height: proxy.size.height * 0.2)
+                .padding(.top, 32)
+            
+            PeriodPickerView(viewStore)
+                .padding(.top, 24)
+            
+        }
+        .frame(height: proxy.size.height * 0.4)
+        .padding(.top, 32)
     }
     
     @ViewBuilder
@@ -120,7 +129,7 @@ struct StatisticsRootView: View {
             )
             .frame(height: max(0, position.wrappedValue == .top
                                ? UIScreen.main.bounds.height
-                              : geometry.size.height * 0.5))
+                               : geometry.size.height * 0.5))
             .frame(maxHeight: .infinity, alignment: .bottom)
             .ignoresSafeArea(.all, edges: .bottom)
         }
@@ -157,7 +166,6 @@ struct StatisticsRootView: View {
             }
     }
 }
-
 
 private struct MainAmountView: View {
     let amount: Double

@@ -21,7 +21,7 @@ struct RootStore {
         var path = StackState<Destination.State>()
         var selectedPeriod: Period = .week
         var selectedDate: Date = Date()
-        var entries: [AccountModel] = [.init(date: .now, amount: 100, name: "Account", description: "Account descriprion"), .init(date: .now, amount: 101, name: "Account1", description: "Account1 descriprion"), .init(date: .now, amount: 102, name: "Account2", description: "Account2 descriprion")]
+        var entries: [AccountModel] = []
         
         func filteredAccounts(entries: [AccountModel], selectedDate: Date) -> [String] {
             entries

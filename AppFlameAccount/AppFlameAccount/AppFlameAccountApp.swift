@@ -18,6 +18,7 @@ struct AppFlameAccountApp: App {
     var body: some Scene {
         WindowGroup {
             StatisticsRootView(store: store)
+                .preferredColorScheme(.light)
         }
     }
 }

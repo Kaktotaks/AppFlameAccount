@@ -14,8 +14,3 @@ struct AccountModel: Identifiable, Equatable {
     let name: String
     let description: String
 }
-
-enum Period: String, CaseIterable, Identifiable {
-    case week, month, year
-    var id: String { rawValue }
-}
