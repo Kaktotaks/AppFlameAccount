@@ -48,3 +48,37 @@ struct AccountViewCell: View {
         
     }
 }
+
+struct AccountViewSkeletonCell: View {
+    var body: some View {
+        HStack {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 48, height: 48)
+                .padding(.horizontal, 16)
+                .shimmering()
+
+            VStack(alignment: .leading, spacing: 6) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 14)
+                    .shimmering()
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 150, height: 12)
+                    .shimmering()
+            }
+
+            Spacer()
+
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 60, height: 14)
+                .padding(.trailing, 16)
+                .shimmering()
+        }
+        .frame(height: 64)
+    }
+}
+

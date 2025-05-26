@@ -70,23 +70,18 @@ struct ChartView: View {
                     .foregroundStyle(gradient.opacity(0.4))
                 }
 
-                // horizontal white line
                 if let selected = selectedEntry {
                     RuleMark(x: .value("Selected", selected.date))
-                        .lineStyle(StrokeStyle(lineWidth: 1))
+                        .lineStyle(StrokeStyle(lineWidth: 2))
                         .foregroundStyle(Color.white)
-                }
 
-                // Зелена крапка
-                if let selected = selectedEntry {
                     PointMark(
                         x: .value("Date", selected.date),
                         y: .value("Amount", selected.amount)
                     )
-                    .symbolSize(50)
+                    .symbolSize(70)
                     .foregroundStyle(Color("chartLineColor"))
                 }
-                
             }
             .chartXScale(domain: minDate ... maxDate)
             .chartYAxis { }
@@ -97,31 +92,78 @@ struct ChartView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onEnded { value in
-                        // Finding closest point
-                        if let date = Date.getDateFrom(locationX: value.location.x, chartWidth: UIScreen.main.bounds.width, minDate: minDate, maxDate: maxDate) {
-                            let nearest = entries.min(by: {
+                        if let date = Date.getDateFrom(
+                            locationX: value.location.x,
+                            chartWidth: UIScreen.main.bounds.width,
+                            minDate: minDate,
+                            maxDate: maxDate
+                        ) {
+                            if let nearest = entries.min(by: {
                                 abs($0.date.timeIntervalSince1970 - date.timeIntervalSince1970) <
                                 abs($1.date.timeIntervalSince1970 - date.timeIntervalSince1970)
-                            })
-                            selectedEntry = nearest
-                            onSelect(nearest!)
+                            }) {
+                                selectedEntry = nearest
+                                onSelect(nearest)
+                            }
                         }
                     }
             )
-            
+
             GeometryReader { geo in
                 let chartWidth = geo.size.width
-                let spacing = chartWidth / CGFloat(entries.count)
-                
-                HStack(spacing: spacing) {
-                    ForEach(entries.indices, id: \.self) { _ in
+                let spacing = chartWidth / CGFloat(max(entries.count - 1, 1))
+
+                ZStack(alignment: .bottomLeading) {
+                    ForEach(entries.indices, id: \.self) { index in
                         Rectangle()
                             .fill(Color.white.opacity(0.2))
                             .frame(width: 2, height: 8)
+                            .offset(x: CGFloat(index) * spacing)
                     }
                 }
-                .frame(height: geo.size.height, alignment: .bottom)
+                .frame(width: chartWidth, height: geo.size.height, alignment: .bottomLeading)
             }
         }
+    }
+}
+
+struct ChartSkeletonView: View {
+    @State private var phase: CGFloat = 0
+    let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        GeometryReader { geo in
+            Canvas { context, size in
+                let path = makeWavePath(width: size.width, height: size.height, phase: phase)
+                context.stroke(path, with: .color(.white.opacity(0.3)), lineWidth: 3)
+            }
+        }
+        .onReceive(timer) { _ in
+            phase += 0.05
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.clear)
+    }
+
+    private func makeWavePath(width: CGFloat, height: CGFloat, phase: CGFloat) -> Path {
+        var path = Path()
+        let amplitude: CGFloat = height * 0.2
+        let midHeight = height / 2
+        let frequency: CGFloat = 2.0
+
+        path.move(to: CGPoint(x: 0, y: midHeight))
+
+        for x in stride(from: 0, through: width, by: 1) {
+            let percent = x / width
+
+            let fade = sin(.pi * percent)
+
+            let angle = (x / width) * frequency * .pi * 2 + phase
+            let y = midHeight + sin(angle) * amplitude * fade
+
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+
+        return path
     }
 }

@@ -8,15 +8,11 @@
 import SwiftUI
 
 enum TextStyle {
-    case mainTitle
     case mainBalance
     case mainBalanceDeclima
-    case secondaryBalance
     case dateDescription
-    case periodTitle
     case accountsListTitle
     case accountListDescriptionTitle
-    case accountNameTitle
     case accountDescriptionTitle
     case accountListAmmount
     case detailsAccountNameTitle
@@ -26,22 +22,14 @@ enum TextStyle {
     
     var font: Font {
         switch self {
-        case .mainTitle:
-            return .system(size: 17, weight: .regular)
         case .mainBalance:
             return .system(size: 48, weight: .semibold)
         case .mainBalanceDeclima:
             return .system(size: 26, weight: .semibold)
-        case .secondaryBalance:
-            return .system(size: 24, weight: .regular)
         case .dateDescription:
             return .system(size: 13, weight: .regular)
-        case .periodTitle:
-            return .system(size: 16, weight: .medium)
         case .accountListDescriptionTitle:
             return .system(size: 13, weight: .light)
-        case .accountNameTitle:
-            return .system(size: 16, weight: .regular)
         case .accountDescriptionTitle:
             return .system(size: 13, weight: .light)
         case .accountListAmmount, .accountsListTitle:
@@ -59,7 +47,7 @@ enum TextStyle {
     
     var alignment: TextAlignment {
         switch self {
-        case .accountsListTitle, .accountListDescriptionTitle , .accountNameTitle:
+        case .accountsListTitle, .accountListDescriptionTitle:
                 .leading
         case .accountListAmmount:
                 .trailing
@@ -70,12 +58,10 @@ enum TextStyle {
     
     var color: Color {
         switch self {
-        case .mainTitle, .mainBalance, .dateDescription, .mainBalanceDeclima:
+        case .mainBalance, .dateDescription, .mainBalanceDeclima:
             return .white
         case .accountDescriptionTitle, .detailsAccountDescriptionTitle:
             return Color.gray
-        case .secondaryBalance:
-            return .whiteSecondary
         default:
             return .primaryText
         }

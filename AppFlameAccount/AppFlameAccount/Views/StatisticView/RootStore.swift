@@ -11,7 +11,7 @@ import ComposableArchitecture
 
 @Reducer
 struct RootStore {
-    @Dependency(\.entryFilterClient) var entryFilterClient
+    @Dependency(\.mockApiClient) var mockApiClient
     
     @Reducer(state: .equatable)
     enum Destination {
@@ -22,6 +22,7 @@ struct RootStore {
         var path = StackState<Destination.State>()
         var entries: [AccountModel] = []
         let title = "Statistics"
+        var isDataLoaded: Bool = false
         
         func filteredAccounts(entries: [AccountModel], selectedDate: Date) -> [String] {
             entries
@@ -63,10 +64,6 @@ struct RootStore {
                 }
             }
         }
-        
-        init() {
-            entries = CSVLoader.loadAccountData(from: .accounts)
-        }
     }
     
     enum Action {
@@ -74,6 +71,8 @@ struct RootStore {
         case path(StackAction<Destination.State, Destination.Action>)
         
         case loadMockData
+        case loadMockDataResponse([AccountModel])
+        
         case selectPeriod(Period)
         case selectDate(Date)
         case selectAccount(AccountModel)
@@ -86,7 +85,16 @@ struct RootStore {
                 state.selectedAccount = account
                 return .none
             case .loadMockData:
-                state.selectedDate = state.entries.sorted(by: { $0.date < $1.date }).last?.date ?? Date()
+                guard !state.isDataLoaded else { return .none }
+                return .run { send in
+                    let entries = try await mockApiClient.loadAccounts()
+                    await send(.loadMockDataResponse(entries))
+                }
+                
+            case .loadMockDataResponse(let entries):
+                state.entries = entries
+                state.selectedDate = entries.sorted(by: { $0.date < $1.date }).last?.date ?? Date()
+                state.isDataLoaded = true
                 return .none
                 
             case .selectPeriod(let period):

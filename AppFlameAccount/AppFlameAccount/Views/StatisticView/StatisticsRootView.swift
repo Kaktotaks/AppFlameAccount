@@ -42,6 +42,7 @@ struct StatisticsRootView: View {
                         MainContentView(viewStore, proxy: proxy)
                         BottomSheetView(viewStore, position: $bottomSheetPosition, mainContentProxy: proxy)
                     }
+                    .fadeTransition(when: viewStore.isDataLoaded)
                 }
                 .navigationBarModifier(title: viewStore.title, color: .white)
                 .background(Color("chartSecondaryColor"))
@@ -57,6 +58,8 @@ struct StatisticsRootView: View {
         }
     }
     
+    
+    // MARK: - View builders
     @ViewBuilder
     private func MainContentView(_ viewStore: ViewStoreOf<RootStore>, proxy: GeometryProxy) -> some View {
         let amount = viewStore.currentAccount?.amount ?? 0
@@ -64,15 +67,20 @@ struct StatisticsRootView: View {
             MainAmountView(amount: amount, isNegative: amount.isNegative, date: (viewStore.selectedAccount?.date ?? viewStore.selectedDate).formattedDescription(for: viewStore.selectedPeriod))
                 .padding(.horizontal, 32)
             
-            ChartView(entries: viewStore.filteredEntries,
-                      selectedEntry: viewStore.selectedAccount,
-                      onSelect: { selected in
-                    viewStore.send(.selectAccount(selected))
-                print(selected)
+            ZStack {
+                if viewStore.isDataLoaded {
+                    ChartView(
+                        entries: viewStore.filteredEntries,
+                        selectedEntry: viewStore.selectedAccount
+                    ) { selected in
+                        viewStore.send(.selectAccount(selected))
+                    }
+                } else {
+                    ChartSkeletonView()
                 }
-            )
-                .frame(height: proxy.size.height * 0.2)
-                .padding(.top, 32)
+            }
+            .frame(height: proxy.size.height * 0.2)
+            .padding(.top, 32)
             
             PeriodPickerView(viewStore)
                 .padding(.top, 24)
@@ -117,15 +125,25 @@ struct StatisticsRootView: View {
                     .padding(.top, 20)
                     .padding(.horizontal, 20)
                 
-                List(viewStore.filteredEntries) { account in
-                    AccountViewCell(
-                        name: account.name,
-                        description: account.description,
-                        amount: account.amount
-                    ) {
-                        viewStore.send(.showDetailsView(model: account))
+                
+                ZStack {
+                    if viewStore.isDataLoaded {
+                        List(viewStore.filteredEntries) { account in
+                            AccountViewCell(
+                                name: account.name,
+                                description: account.description,
+                                amount: account.amount
+                            ) {
+                                viewStore.send(.showDetailsView(model: account))
+                            }
+                            .listRowInsets(EdgeInsets())
+                        }
+                    } else {
+                        List(0..<5, id: \.self) { _ in
+                            AccountViewSkeletonCell()
+                                .listRowInsets(EdgeInsets())
+                        }
                     }
-                    .listRowInsets(EdgeInsets())
                 }
                 .listStyle(.plain)
                 .padding(.bottom, position.wrappedValue == .top ? geometry.safeAreaInsets.bottom + 60 : 20)
@@ -140,6 +158,27 @@ struct StatisticsRootView: View {
             .frame(maxHeight: .infinity, alignment: .bottom)
             .ignoresSafeArea(.all, edges: .bottom)
         }
+    }
+    
+    @ViewBuilder
+    private func PeriodPickerView(_ viewStore: ViewStoreOf<RootStore>) -> some View {
+        HStack(spacing: 12) {
+            ForEach(Period.allCases, id: \.self) { period in
+                Button {
+                    viewStore.send(.selectPeriod(period))
+                } label: {
+                    Text(period.rawValue.capitalized)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(viewStore.selectedPeriod == period ? Color.white.opacity(0.15) : Color.clear)
+                        )
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .padding(.top, 8)
     }
 }
 
@@ -158,25 +197,4 @@ private struct MainAmountView: View {
                 .opacity(0.6)
         }
     }
-}
-
-@ViewBuilder
-private func PeriodPickerView(_ viewStore: ViewStoreOf<RootStore>) -> some View {
-    HStack(spacing: 12) {
-        ForEach(Period.allCases, id: \.self) { period in
-            Button {
-                viewStore.send(.selectPeriod(period))
-            } label: {
-                Text(period.rawValue.capitalized)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(viewStore.selectedPeriod == period ? Color.white.opacity(0.15) : Color.clear)
-                    )
-                    .foregroundColor(.white)
-            }
-        }
-    }
-    .padding(.top, 8)
 }
