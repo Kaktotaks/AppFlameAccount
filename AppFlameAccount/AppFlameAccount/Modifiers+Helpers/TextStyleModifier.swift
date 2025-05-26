@@ -10,6 +10,7 @@ import SwiftUI
 enum TextStyle {
     case mainTitle
     case mainBalance
+    case mainBalanceDeclima
     case secondaryBalance
     case dateDescription
     case periodTitle
@@ -21,6 +22,7 @@ enum TextStyle {
     case detailsAccountNameTitle
     case detailsAccountDescriptionTitle
     case detailsAccountAmmount
+    case detailsAccountAmmountDeclima
     
     var font: Font {
         switch self {
@@ -28,6 +30,8 @@ enum TextStyle {
             return .system(size: 17, weight: .regular)
         case .mainBalance:
             return .system(size: 48, weight: .semibold)
+        case .mainBalanceDeclima:
+            return .system(size: 26, weight: .semibold)
         case .secondaryBalance:
             return .system(size: 24, weight: .regular)
         case .dateDescription:
@@ -41,13 +45,15 @@ enum TextStyle {
         case .accountDescriptionTitle:
             return .system(size: 13, weight: .light)
         case .accountListAmmount, .accountsListTitle:
-            return .system(size: 16, weight: .regular)
+            return .system(size: 16, weight: .semibold)
         case .detailsAccountNameTitle:
             return .system(size: 24, weight: .regular)
         case .detailsAccountDescriptionTitle:
             return .system(size: 16, weight: .light)
         case .detailsAccountAmmount:
             return .system(size: 40, weight: .regular)
+        case .detailsAccountAmmountDeclima:
+            return .system(size: 24, weight: .regular)
         }
     }
     
@@ -64,9 +70,9 @@ enum TextStyle {
     
     var color: Color {
         switch self {
-        case .mainTitle, .mainBalance, .dateDescription:
+        case .mainTitle, .mainBalance, .dateDescription, .mainBalanceDeclima:
             return .white
-        case .dateDescription, .accountDescriptionTitle, .detailsAccountDescriptionTitle:
+        case .accountDescriptionTitle, .detailsAccountDescriptionTitle:
             return Color.gray
         case .secondaryBalance:
             return .whiteSecondary

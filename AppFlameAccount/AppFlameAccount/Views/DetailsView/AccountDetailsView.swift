@@ -12,6 +12,10 @@ import ComposableArchitecture
 struct AccountDetailsStore {
     struct State: Equatable {
         var model: AccountModel
+        let title = "Details"
+        var isNegativeBalance: Bool {
+            model.amount.isNegative
+        }
     }
     
     enum Action {
@@ -46,24 +50,23 @@ struct AccountDetailsView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(alignment: .center, spacing: 24) {
-                    Image(.bankLogo)
+                Image(.bankLogo)
                     .resizable()
                     .frame(width: 80, height: 80)
                     .padding(.top, 36)
-                    
+                
                 VStack(spacing: 4) {
                     Text(viewStore.model.name)
                         .textStyle(.detailsAccountNameTitle)
                     Text(viewStore.model.description)
                         .textStyle(.detailsAccountDescriptionTitle)
                 }
-                    
-                Text("$" + viewStore.model.amount.formattedAmount)
-                    .textStyle(.detailsAccountAmmount)
+                
+                FormattedBalanceView(amount: viewStore.model.amount, textStyle: .detailsAccountAmmount, balanceType: .details)
                 
                 Spacer()
             }
-            .navigationBarModifier(title: "Details", color: .black)
+            .navigationBarModifier(title: viewStore.title, color: .black)
             .setupBackButton() {
                 viewStore.send(.delegate(.navigateBack))
             }

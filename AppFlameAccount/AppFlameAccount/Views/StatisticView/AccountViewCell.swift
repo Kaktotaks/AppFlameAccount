@@ -33,8 +33,7 @@ struct AccountViewCell: View {
                     
                     Spacer()
                     
-                    Text("$" + amount.formattedAmount)
-                        .textStyle(.accountListAmmount)
+                    FormattedBalanceView(amount: amount, textStyle: .accountListAmmount)
                         .padding(.trailing, 16)
                 }
             }

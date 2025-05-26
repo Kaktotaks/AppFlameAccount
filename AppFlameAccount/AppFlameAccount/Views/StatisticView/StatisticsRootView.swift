@@ -29,7 +29,7 @@ enum Period: String, CaseIterable, Identifiable {
 }
 
 struct StatisticsRootView: View {
-    @State var store: StoreOf<RootStore>
+    var store: StoreOf<RootStore>
     @State private var bottomSheetPosition: BottomSheetPosition = .middle
     
     var body: some View {
@@ -43,7 +43,7 @@ struct StatisticsRootView: View {
                         BottomSheetView(viewStore, position: $bottomSheetPosition, mainContentProxy: proxy)
                     }
                 }
-                .navigationBarModifier(title: "Statistics", color: .white)
+                .navigationBarModifier(title: viewStore.title, color: .white)
                 .background(Color("chartSecondaryColor"))
                 .onAppear {
                     viewStore.send(.loadMockData)
@@ -59,11 +59,18 @@ struct StatisticsRootView: View {
     
     @ViewBuilder
     private func MainContentView(_ viewStore: ViewStoreOf<RootStore>, proxy: GeometryProxy) -> some View {
+        let amount = viewStore.currentAccount?.amount ?? 0
         VStack {
-            MainAmountView(amount: 177845.32, isNegative: false, description: "Thursday, Jan 13, 2024")
+            MainAmountView(amount: amount, isNegative: amount.isNegative, date: (viewStore.selectedAccount?.date ?? viewStore.selectedDate).formattedDescription(for: viewStore.selectedPeriod))
                 .padding(.horizontal, 32)
             
-            ChartView(entries: filteredEntries(viewStore: viewStore))
+            ChartView(entries: viewStore.filteredEntries,
+                      selectedEntry: viewStore.selectedAccount,
+                      onSelect: { selected in
+                    viewStore.send(.selectAccount(selected))
+                print(selected)
+                }
+            )
                 .frame(height: proxy.size.height * 0.2)
                 .padding(.top, 32)
             
@@ -110,7 +117,7 @@ struct StatisticsRootView: View {
                     .padding(.top, 20)
                     .padding(.horizontal, 20)
                 
-                List(filteredAccounts(viewStore: viewStore)) { account in
+                List(viewStore.filteredEntries) { account in
                     AccountViewCell(
                         name: account.name,
                         description: account.description,
@@ -120,73 +127,32 @@ struct StatisticsRootView: View {
                     }
                     .listRowInsets(EdgeInsets())
                 }
-                //                .navigationDetailsModifier(title: "Statistics", color: .white)
                 .listStyle(.plain)
+                .padding(.bottom, position.wrappedValue == .top ? geometry.safeAreaInsets.bottom + 60 : 20)
             }
             .background(
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
                     .fill(Color(.systemBackground))
             )
             .frame(height: max(0, position.wrappedValue == .top
-                               ? UIScreen.main.bounds.height
+                               ? geometry.size.height + geometry.safeAreaInsets.top
                                : geometry.size.height * 0.5))
             .frame(maxHeight: .infinity, alignment: .bottom)
             .ignoresSafeArea(.all, edges: .bottom)
         }
-    }
-    
-    // MARK: FUNCS -
-    private func filteredEntries(viewStore: ViewStoreOf<RootStore>) -> [AccountModel] {
-        let all = viewStore.entries.sorted { $0.date < $1.date }
-        let calendar = Calendar.current
-        let now = viewStore.entries.map(\.date).max() ?? Date()
-        
-        switch viewStore.selectedPeriod {
-        case .week:
-            let start = calendar.date(byAdding: .day, value: -6, to: now) ?? now
-            return all.filter { $0.date >= start && $0.date <= now }
-        case .month:
-            let start = calendar.date(byAdding: .month, value: -1, to: now) ?? now
-            return all.filter { $0.date >= start && $0.date <= now }
-        case .year:
-            return all
-        }
-    }
-    
-    private func filteredAccounts(viewStore: ViewStoreOf<RootStore>) -> [AccountModel] {
-        filteredEntries(viewStore: viewStore)
-            .filter { $0.date <= viewStore.selectedDate }
-            .map { entry in
-                AccountModel(
-                    date: entry.date,
-                    amount: entry.amount,
-                    name: entry.name,
-                    description: entry.description
-                )
-            }
     }
 }
 
 private struct MainAmountView: View {
     let amount: Double
     let isNegative: Bool
-    let description: String
+    let date: String
     
     var body: some View {
         VStack(spacing: 4) {
-            HStack(spacing: 0) {
-                if isNegative {
-                    Text("-")
-                }
-                Text("$")
-                    .textStyle(.mainBalance)
-                    .opacity(0.6)
-                Text(amount.formattedAmount)
-                    .lineLimit(0)
-                    .textStyle(.mainBalance)
-            }
+            FormattedBalanceView(amount: amount, textStyle: .mainBalance, balanceType: .statistic)
             
-            Text(description)
+            Text(date)
                 .textStyle(.dateDescription)
                 .textStyle(.mainBalance)
                 .opacity(0.6)

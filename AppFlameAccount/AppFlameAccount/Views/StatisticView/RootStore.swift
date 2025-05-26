@@ -11,6 +11,7 @@ import ComposableArchitecture
 
 @Reducer
 struct RootStore {
+    @Dependency(\.entryFilterClient) var entryFilterClient
     
     @Reducer(state: .equatable)
     enum Destination {
@@ -19,14 +20,52 @@ struct RootStore {
     
     struct State: Equatable {
         var path = StackState<Destination.State>()
-        var selectedPeriod: Period = .week
-        var selectedDate: Date = Date()
         var entries: [AccountModel] = []
+        let title = "Statistics"
         
         func filteredAccounts(entries: [AccountModel], selectedDate: Date) -> [String] {
             entries
                 .filter { $0.date <= selectedDate }
                 .map(\.name)
+        }
+        
+        var selectedPeriod: Period = .week
+        var selectedDate: Date = .now
+        var selectedAccount: AccountModel? = nil
+
+        var currentAccount: AccountModel? {
+            selectedAccount ?? filteredEntries
+                .filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+                .first
+        }
+
+        var filteredEntries: [AccountModel] {
+            let calendar = Calendar.current
+            let now = entries.map(\.date).max() ?? Date()
+
+            switch selectedPeriod {
+            case .week:
+                let start = calendar.date(byAdding: .day, value: -6, to: now) ?? now
+                return entries.filter { $0.date >= start && $0.date <= now }
+
+            case .month:
+                let lastMonth = calendar.component(.month, from: now)
+                let lastYear = calendar.component(.year, from: now)
+                return entries.filter {
+                    let comp = calendar.dateComponents([.year, .month], from: $0.date)
+                    return comp.year == lastYear && comp.month == lastMonth
+                }
+
+            case .year:
+                let lastYear = calendar.component(.year, from: now)
+                return entries.filter {
+                    calendar.component(.year, from: $0.date) == lastYear
+                }
+            }
+        }
+        
+        init() {
+            entries = CSVLoader.loadAccountData(from: .accounts)
         }
     }
     
@@ -37,13 +76,16 @@ struct RootStore {
         case loadMockData
         case selectPeriod(Period)
         case selectDate(Date)
+        case selectAccount(AccountModel)
     }
     
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .selectAccount(let account):
+                state.selectedAccount = account
+                return .none
             case .loadMockData:
-                state.entries = MockDataGenerator.generate()
                 state.selectedDate = state.entries.sorted(by: { $0.date < $1.date }).last?.date ?? Date()
                 return .none
                 
