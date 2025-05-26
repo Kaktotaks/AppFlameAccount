@@ -118,15 +118,20 @@ struct ChartView: View {
 
             GeometryReader { geo in
                 let chartWidth = geo.size.width
-                let spacing = chartWidth / CGFloat(max(entries.count - 1, 1))
-
-                ZStack(alignment: .bottomLeading) {
+                let spacing = chartWidth / CGFloat(entries.count - 1)
+                
+                ZStack(alignment: .bottom) {
                     ForEach(entries.indices, id: \.self) { index in
                         Rectangle()
                             .fill(Color.white.opacity(0.2))
                             .frame(width: 2, height: 8)
                             .offset(x: CGFloat(index) * spacing)
                     }
+                    
+                    Rectangle()
+                        .fill(Color.white.opacity(0.2))
+                        .frame(width: 2, height: 8)
+                        .offset(x: chartWidth - 2)
                 }
                 .frame(width: chartWidth, height: geo.size.height, alignment: .bottomLeading)
             }
