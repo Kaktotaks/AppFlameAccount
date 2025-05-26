@@ -12,9 +12,9 @@ struct ChartView: View {
     let entries: [AccountModel]
     @State var selectedEntry: AccountModel?
     let onSelect: (AccountModel) -> Void
-    
-    var body: some View {
-        let gradient = LinearGradient(
+
+    private var gradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color("chartLineColor").opacity(0.5),
                 Color("chartLineColor").opacity(0)
@@ -22,20 +22,27 @@ struct ChartView: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        
-        let minDate = entries.map(\.date).min() ?? Date()
-        let maxDate = entries.map(\.date).max() ?? Date()
+    }
 
-        let selectedDate = selectedEntry?.date
+    private var minDate: Date {
+        entries.map(\.date).min() ?? Date()
+    }
 
-        let beforeEntries = selectedDate == nil
-            ? entries
-            : entries.filter { $0.date <= selectedDate! }
+    private var maxDate: Date {
+        entries.map(\.date).max() ?? Date()
+    }
 
-        let afterEntries = selectedDate == nil
-            ? []
-            : entries.filter { $0.date > selectedDate! }
+    private var beforeEntries: [AccountModel] {
+        guard let selected = selectedEntry else { return entries }
+        return entries.filter { $0.date <= selected.date }
+    }
 
+    private var afterEntries: [AccountModel] {
+        guard let selected = selectedEntry else { return [] }
+        return entries.filter { $0.date > selected.date }
+    }
+
+    var body: some View {
         ZStack {
             Chart {
                 ForEach(beforeEntries) { entry in
