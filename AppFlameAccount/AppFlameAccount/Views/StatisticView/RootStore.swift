@@ -33,34 +33,6 @@ struct RootStore {
                 .filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
                 .first
         }
-
-        var filteredEntries: [AccountModel] {
-            let calendar = Calendar.current
-            let sortedEntries = entries.sorted { $0.date < $1.date }
-
-            guard let minDate = sortedEntries.first?.date,
-                  let maxDate = sortedEntries.last?.date else { return [] }
-
-            let maxComponents = calendar.dateComponents([.year, .month], from: maxDate)
-
-            switch selectedPeriod {
-            case .week:
-                let lastMonthEntries = entries.filter {
-                    let comps = calendar.dateComponents([.year, .month], from: $0.date)
-                    return comps.year == maxComponents.year && comps.month == maxComponents.month
-                }.sorted { $0.date < $1.date }
-                return Array(lastMonthEntries.suffix(7))
-
-            case .month:
-                return entries.filter {
-                    let comps = calendar.dateComponents([.year, .month], from: $0.date)
-                    return comps.year == maxComponents.year && comps.month == maxComponents.month
-                }
-
-            case .year:
-                return entries.filter { $0.date >= minDate && $0.date <= maxDate }
-            }
-        }
     }
     
     enum Action {
@@ -112,5 +84,36 @@ struct RootStore {
             }
         }
         .forEach(\.path, action: \.path)
+    }
+}
+
+// Extension for big cp
+extension RootStore.State {
+    var filteredEntries: [AccountModel] {
+        let calendar = Calendar.current
+        let sortedEntries = entries.sorted { $0.date < $1.date }
+
+        guard let minDate = sortedEntries.first?.date,
+              let maxDate = sortedEntries.last?.date else { return [] }
+
+        let maxComponents = calendar.dateComponents([.year, .month], from: maxDate)
+
+        switch selectedPeriod {
+        case .week:
+            let lastMonthEntries = entries.filter {
+                let comps = calendar.dateComponents([.year, .month], from: $0.date)
+                return comps.year == maxComponents.year && comps.month == maxComponents.month
+            }.sorted { $0.date < $1.date }
+            return Array(lastMonthEntries.suffix(7))
+
+        case .month:
+            return entries.filter {
+                let comps = calendar.dateComponents([.year, .month], from: $0.date)
+                return comps.year == maxComponents.year && comps.month == maxComponents.month
+            }
+
+        case .year:
+            return entries.filter { $0.date >= minDate && $0.date <= maxDate }
+        }
     }
 }
