@@ -128,7 +128,7 @@ struct StatisticsRootView: View {
                 
                 ZStack {
                     if viewStore.isDataLoaded {
-                        List(viewStore.filteredEntries) { account in
+                        List(viewStore.filteredEntries.sorted(by: { $0.date > $1.date })) { account in
                             AccountViewCell(
                                 name: account.name,
                                 description: account.description,

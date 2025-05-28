@@ -9,7 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 
 struct MockApiClient {
-    var loadAccounts: @Sendable () async throws -> [AccountModel]
+    var loadAccounts: () async throws -> [AccountModel]
 }
 
 enum MockApiClientKey: DependencyKey {

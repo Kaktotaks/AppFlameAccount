@@ -24,12 +24,6 @@ struct RootStore {
         let title = "Statistics"
         var isDataLoaded: Bool = false
         
-        func filteredAccounts(entries: [AccountModel], selectedDate: Date) -> [String] {
-            entries
-                .filter { $0.date <= selectedDate }
-                .map(\.name)
-        }
-        
         var selectedPeriod: Period = .week
         var selectedDate: Date = .now
         var selectedAccount: AccountModel? = nil
@@ -42,26 +36,29 @@ struct RootStore {
 
         var filteredEntries: [AccountModel] {
             let calendar = Calendar.current
-            let now = entries.map(\.date).max() ?? Date()
+            let sortedEntries = entries.sorted { $0.date < $1.date }
+
+            guard let minDate = sortedEntries.first?.date,
+                  let maxDate = sortedEntries.last?.date else { return [] }
+
+            let maxComponents = calendar.dateComponents([.year, .month], from: maxDate)
 
             switch selectedPeriod {
             case .week:
-                let start = calendar.date(byAdding: .day, value: -6, to: now) ?? now
-                return entries.filter { $0.date >= start && $0.date <= now }
+                let lastMonthEntries = entries.filter {
+                    let comps = calendar.dateComponents([.year, .month], from: $0.date)
+                    return comps.year == maxComponents.year && comps.month == maxComponents.month
+                }.sorted { $0.date < $1.date }
+                return Array(lastMonthEntries.suffix(7))
 
             case .month:
-                let lastMonth = calendar.component(.month, from: now)
-                let lastYear = calendar.component(.year, from: now)
                 return entries.filter {
-                    let comp = calendar.dateComponents([.year, .month], from: $0.date)
-                    return comp.year == lastYear && comp.month == lastMonth
+                    let comps = calendar.dateComponents([.year, .month], from: $0.date)
+                    return comps.year == maxComponents.year && comps.month == maxComponents.month
                 }
 
             case .year:
-                let lastYear = calendar.component(.year, from: now)
-                return entries.filter {
-                    calendar.component(.year, from: $0.date) == lastYear
-                }
+                return entries.filter { $0.date >= minDate && $0.date <= maxDate }
             }
         }
     }
