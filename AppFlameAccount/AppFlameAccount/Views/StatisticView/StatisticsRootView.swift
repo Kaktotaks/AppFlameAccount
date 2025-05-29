@@ -138,6 +138,9 @@ struct StatisticsRootView: View {
                             }
                             .listRowInsets(EdgeInsets())
                         }
+                        .refreshable {
+                                viewStore.send(.refreshData)
+                            }
                     } else {
                         List(0..<5, id: \.self) { _ in
                             AccountViewSkeletonCell()

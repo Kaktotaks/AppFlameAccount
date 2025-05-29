@@ -41,6 +41,7 @@ struct RootStore {
         
         case loadMockData
         case loadMockDataResponse([AccountModel])
+        case refreshData
         
         case selectPeriod(Period)
         case selectDate(Date)
@@ -65,6 +66,13 @@ struct RootStore {
                 state.selectedDate = entries.sorted(by: { $0.date < $1.date }).last?.date ?? Date()
                 state.isDataLoaded = true
                 return .none
+                
+            case .refreshData:
+                state.isDataLoaded = false
+                return .run { send in
+                    let entries = try await mockApiClient.loadAccounts()
+                    await send(.loadMockDataResponse(entries))
+                }
                 
             case .selectPeriod(let period):
                 state.selectedPeriod = period
